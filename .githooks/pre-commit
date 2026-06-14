@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# keyvind pre-commit hook: keep the core green.
+# Enable once with: git config core.hooksPath .githooks
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+echo "[pre-commit] make all"
+make all

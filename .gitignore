@@ -1,0 +1,6 @@
+coverage.out
+*.bak
+/dist/
+# compiled example binaries (named after their dir)
+/examples/basic/basic
+/examples/bubbletea/bubbletea

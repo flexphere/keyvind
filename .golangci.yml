@@ -1,0 +1,41 @@
+version: "2"
+
+run:
+  timeout: 3m
+
+linters:
+  default: standard # errcheck, govet, ineffassign, staticcheck, unused
+  enable:
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+    - gocritic
+    - prealloc
+    - bodyclose
+    - nilerr
+    - errorlint
+  settings:
+    revive:
+      rules:
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+    gocritic:
+      disabled-checks:
+        - ifElseChain # the matcher's switch-style flow is intentional
+  exclusions:
+    rules:
+      # unparam flags test fixtures that intentionally keep a general signature.
+      - path: _test\.go
+        linters:
+          - unparam
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/flexphere/keyvind

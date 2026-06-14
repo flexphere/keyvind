@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [".", "adapters/teakit", "adapters/teakitv2", "adapters/tcellkit"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+          cache-dependency-path: "**/go.sum"
+      - name: Verify gofmt
+        if: matrix.module == '.'
+        run: |
+          bad="$(gofmt -l .)"
+          if [ -n "$bad" ]; then
+            echo "gofmt needed on:"; echo "$bad"; exit 1
+          fi
+      - name: go vet
+        working-directory: ${{ matrix.module }}
+        run: go vet ./...
+      - name: Test (race + coverage)
+        working-directory: ${{ matrix.module }}
+        run: go test -race -coverprofile=coverage.out ./...
+
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [".", "adapters/teakit", "adapters/teakitv2", "adapters/tcellkit"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+          cache-dependency-path: "**/go.sum"
+      - uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.12.2
+          working-directory: ${{ matrix.module }}
+
+  examples:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: ["examples/bubbletea", "examples/tview"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+          cache-dependency-path: "**/go.sum"
+      - name: Build & vet
+        working-directory: ${{ matrix.module }}
+        run: |
+          go build -o /dev/null ./...
+          go vet ./...
